@@ -25,7 +25,7 @@
             id="username"
             v-model="username"
             name="username"
-            type="username"
+            type="text"
             class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             required
           />
@@ -64,6 +64,8 @@
   </div>
 </template>
 <script>
+import axios from 'axios';
+
 export default {
   name: "Login",
   data () {
@@ -73,11 +75,22 @@ export default {
     };
   },
   methods: {
-    login() {
-      console.log('username ', this.username);
-      console.log('password ', this.password);
+    async login() {
+      const result = await axios.post(`${process.env.BACKEND_URL}login`, {username: this.username, password: this.password});
+      if (result.data.success) {
+        const userInfo = {
+          username: result.data.username,
+          firstname: result.data.firstname,
+          lastname: result.data.lastname,
+          token: result.data.token
+        }
+        localStorage.setItem('user', JSON.stringify(userInfo));
+        this.$toast.success(result.data.message);
+        this.$router.push('/')
+      } else {
+        this.$toast.warning(result.data.message);
+      }
     }
   },
-  created () {},
 };
 </script>
